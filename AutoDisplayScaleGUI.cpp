@@ -354,7 +354,10 @@ void AddTrayIcon(HWND hwnd) {
     g_nid.uID = ID_TRAY_ICON;
     g_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     g_nid.uCallbackMessage = WM_TRAYICON;
-    g_nid.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    HICON hTrayIcon = static_cast<HICON>(LoadImage(
+        GetModuleHandle(nullptr), MAKEINTRESOURCE(101), IMAGE_ICON,
+        GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
+    g_nid.hIcon = hTrayIcon ? hTrayIcon : LoadIcon(nullptr, IDI_APPLICATION);
     wcscpy_s(g_nid.szTip, L"Auto Display Scale");
     Shell_NotifyIconW(NIM_ADD, &g_nid);
     g_trayAdded = true;
@@ -579,8 +582,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     wc.cbSize        = sizeof(WNDCLASSEXW);
     wc.lpfnWndProc   = WndProc;
     wc.hInstance     = hInstance;
-    wc.hIcon         = LoadIcon(nullptr, IDI_APPLICATION);
-    wc.hCursor       = LoadCursor(nullptr, IDC_ARROW);
+    HICON hBigIcon = LoadIcon(hInstance, MAKEINTRESOURCE(101));
+    HICON hSmallIcon = static_cast<HICON>(LoadImage(
+        hInstance, MAKEINTRESOURCE(101), IMAGE_ICON,
+        GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
+
+    wc.hIcon   = hBigIcon ? hBigIcon : LoadIcon(nullptr, IDI_APPLICATION);
+    wc.hIconSm = hSmallIcon ? hSmallIcon : wc.hIcon;
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
     wc.lpszClassName = kWindowClassName;
 
